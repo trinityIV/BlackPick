@@ -3,72 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streaming de Jeu</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: black;
-        }
-        #gameStream {
-            display: block;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover;
-        }
-    </style>
+    <title>Contrôler Quake 2</title>
 </head>
 <body>
-    <img id="gameStream" alt="Streaming du jeu">
-    
-    <script>
-        // Connexion au WebSocket
-        const ws = new WebSocket("ws://localhost:8181"); // Changez l'adresse si nécessaire
-        const imgElement = document.getElementById("gameStream");
+    <h1>Contrôler Quake 2</h1>
+    <button onclick="envoyerCommande('move_forward')">Avancer</button>
+    <button onclick="envoyerCommande('move_backward')">Reculer</button>
 
-        // Recevoir le flux vidéo
-        ws.onmessage = function(event) {
-            const blob = new Blob([event.data], { type: "image/jpeg" });
-            const url = URL.createObjectURL(blob);
-            imgElement.src = url;
+    <script>
+        const ws = new WebSocket('ws://localhost:9002/GameControl');
+
+        ws.onopen = () => {
+            console.log('Connecté au serveur WebSocket');
         };
 
-        // Gestion des événements clavier et souris
-        document.addEventListener('keydown', function(event) {
-            ws.send(JSON.stringify({
-                type: 'keydown',
-                key: event.key
-            }));
-        });
+        ws.onmessage = (event) => {
+            console.log('Message du serveur :', event.data);
+        };
 
-        document.addEventListener('keyup', function(event) {
-            ws.send(JSON.stringify({
-                type: 'keyup',
-                key: event.key
-            }));
-        });
-
-        document.addEventListener('mousemove', function(event) {
-            ws.send(JSON.stringify({
-                type: 'mousemove',
-                x: event.clientX,
-                y: event.clientY
-            }));
-        });
-
-        document.addEventListener('mousedown', function(event) {
-            ws.send(JSON.stringify({
-                type: 'mousedown',
-                button: event.button
-            }));
-        });
-
-        document.addEventListener('mouseup', function(event) {
-            ws.send(JSON.stringify({
-                type: 'mouseup',
-                button: event.button
-            }));
-        });
+        function envoyerCommande(commande) {
+            ws.send(commande);
+        }
     </script>
 </body>
 </html>
