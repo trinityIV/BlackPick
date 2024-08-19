@@ -3,34 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trinity</title>
+    <title>Streaming de Jeu</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        #gameStream {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+        }
+    </style>
 </head>
 <body>
-    <img id="gameStream" alt="Streaming du jeu" width="100%" height="auto">
+    <img id="gameStream" alt="Streaming du jeu">
+    
     <script>
-        const ws = new WebSocket("ws://localhost:8181");
+        // Connexion au WebSocket
+        const ws = new WebSocket("ws://localhost:8181"); // Changez l'adresse si nécessaire
         const imgElement = document.getElementById("gameStream");
 
+        // Recevoir le flux vidéo
         ws.onmessage = function(event) {
             const blob = new Blob([event.data], { type: "image/jpeg" });
             const url = URL.createObjectURL(blob);
             imgElement.src = url;
         };
 
+        // Gestion des événements clavier et souris
         document.addEventListener('keydown', function(event) {
-            ws.send(JSON.stringify({ type: 'keydown', key: event.key }));
+            ws.send(JSON.stringify({
+                type: 'keydown',
+                key: event.key
+            }));
         });
 
         document.addEventListener('keyup', function(event) {
-            ws.send(JSON.stringify({ type: 'keyup', key: event.key }));
+            ws.send(JSON.stringify({
+                type: 'keyup',
+                key: event.key
+            }));
         });
 
         document.addEventListener('mousemove', function(event) {
-            ws.send(JSON.stringify({ type: 'mousemove', x: event.clientX, y: event.clientY }));
+            ws.send(JSON.stringify({
+                type: 'mousemove',
+                x: event.clientX,
+                y: event.clientY
+            }));
         });
 
-        document.addEventListener('click', function(event) {
-            ws.send(JSON.stringify({ type: 'click', button: event.button }));
+        document.addEventListener('mousedown', function(event) {
+            ws.send(JSON.stringify({
+                type: 'mousedown',
+                button: event.button
+            }));
+        });
+
+        document.addEventListener('mouseup', function(event) {
+            ws.send(JSON.stringify({
+                type: 'mouseup',
+                button: event.button
+            }));
         });
     </script>
 </body>
