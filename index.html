@@ -1,23 +1,58 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrôler Quake 2 avec Manette Xbox</title>
+    <title>Game Streaming</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #000;
+        }
+        video {
+            width: 80%;
+            height: auto;
+            border: 2px solid #fff;
+        }
+    </style>
 </head>
 <body>
-    
+    <video id="stream" autoplay></video>
 
     <script>
-        const ws = new WebSocket('localhost:8080/GameControl');
+        const video = document.getElementById('stream');
+        const socket = new WebSocket('ws://localhost:3000');
 
-        ws.onopen = () => {
-            console.log('Connecté au serveur WebSocket');
+        socket.binaryType = 'arraybuffer'; // Handle binary data
+
+        socket.onmessage = (event) => {
+            const blob = new Blob([event.data], { type: 'video/mpeg' });
+            const url = URL.createObjectURL(blob);
+            video.src = url;
+            window.requestAnimationFrame(() => video.play()); // Optimize playback
         };
 
-        ws.onmessage = (event) => {
-            console.log('Message du serveur :', event.data);
+        socket.onerror = (error) => {
+            console.error('WebSocket error:', error);
         };
+
+        socket.onclose = () => {
+            console.log('WebSocket closed');
+        };
+
+        // Capture keyboard and mouse inputs
+        window.addEventListener('keydown', (e) => {
+            socket.send(JSON.stringify({ type: 'key', key: e.key }));
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            socket.send(JSON.stringify({ type: 'mouse', x: e.clientX, y: e.clientY }));
+        });
     </script>
 </body>
 </html>
