@@ -9,7 +9,7 @@
     <h1>Contrôler Quake 2 avec Manette Xbox</h1>
 
     <script>
-        const ws = new WebSocket('ws://localhost:8080/GameControl');
+        const ws = new WebSocket('localhost:8080/GameControl');
 
         ws.onopen = () => {
             console.log('Connecté au serveur WebSocket');
